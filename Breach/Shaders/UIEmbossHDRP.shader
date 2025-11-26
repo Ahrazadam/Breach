@@ -55,6 +55,15 @@ Shader "UI/Emboss HDRP" {
 
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+
+            // UnityUI.cginc is authored against the built-in pipeline's fixed* typedefs.
+            // HDRP HLSL doesn't provide them, so alias fixed -> half to avoid compilation errors.
+            #ifndef fixed
+                #define fixed half
+                #define fixed2 half2
+                #define fixed3 half3
+                #define fixed4 half4
+            #endif
             #include "UnityUI.cginc"
 
             CBUFFER_START(UnityPerMaterial)
