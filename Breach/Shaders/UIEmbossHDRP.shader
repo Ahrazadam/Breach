@@ -55,6 +55,7 @@ Shader "UI/Emboss HDRP" {
 
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Common.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/SpaceTransforms.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/UnityInstancing.hlsl"
 
             // UnityUI.cginc is authored against the built-in pipeline's fixed* typedefs.
@@ -94,6 +95,7 @@ Shader "UI/Emboss HDRP" {
                 float4 color : COLOR;
                 float2 uv : TEXCOORD0;
                 float4 worldPos : TEXCOORD1;
+                UNITY_VERTEX_OUTPUT_INSTANCE_ID
                 UNITY_VERTEX_OUTPUT_STEREO
             };
 
@@ -101,7 +103,8 @@ Shader "UI/Emboss HDRP" {
                 v2f o;
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
-                o.vertex = UnityObjectToClipPos(v.vertex);
+                UNITY_TRANSFER_INSTANCE_ID(v, o);
+                o.vertex = TransformObjectToHClip(v.vertex);
                 o.uv = TRANSFORM_TEX(v.texcoord, _MainTex);
                 o.color = v.color * _Color;
                 o.worldPos = v.vertex;
@@ -109,6 +112,7 @@ Shader "UI/Emboss HDRP" {
             }
 
             float4 frag (v2f i) : SV_Target {
+                UNITY_SETUP_INSTANCE_ID(i);
                 #ifdef UNITY_UI_CLIP_RECT
                     if (UnityGet2DClipping(i.worldPos.xy, _ClipRect) == 0) discard;
                 #endif
